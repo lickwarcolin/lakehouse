@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Terminal Launcher</title>
+<style>
+  @import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
+  body { margin:0; height:100vh; background:#222; display:flex; justify-content:center; align-items:center; }
+  .terminal { width:80vw; max-width:600px; background:rgba(20,20,20,0.9); font-family:'Ubuntu Mono', monospace; color:#87d441; border-radius:6px; box-shadow:0 4px 10px rgba(0,0,0,0.5); position:relative; overflow:hidden; }
+  .bar { height:30px; background:linear-gradient(#504b45,#3c3b37); display:flex; align-items:center; padding:0 8px; border-top-left-radius:6px; border-top-right-radius:6px; }
+  .buttons { display:flex; gap:6px; }
+  .button { width:12px; height:12px; border-radius:50%; background:linear-gradient(#7d7871,#595953); }
+  .button.exit { background:linear-gradient(#f37458,#de4c12); }
+  .bar-text { margin-left:8px; color:#d5d0ce; font-size:14px; }
+  .body { padding:12px 16px; white-space:pre-wrap; line-height:1.4; position:relative; }
+  .terminal::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background-image:linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.1) 51%); background-size:100% 2px; pointer-events:none; }
+  .cursor, .prompt-label::after { display:inline-block; width:8px; height:1.2em; background:#87d441; margin-left:2px; animation:blink 1s step-end infinite; vertical-align:bottom; }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+  .prompt-label { position:relative; }
+  .password-input { background:transparent; border:none; color:#87d441; font:inherit; outline:none; caret-color:transparent; width:150px; }
+  a.terminal-link { display:block; color:#87d441; text-decoration:none; margin:4px 0; }
+  a.terminal-link:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="bar">
+      <div class="buttons">
+        <div class="button exit"></div><div class="button"></div><div class="button"></div>
+      </div>
+      <div class="bar-text">user@lakehouse:~</div>
+    </div>
+    <div class="body" id="terminal-body"></div>
+  </div>
+
+  <script>
+    function htmlTypewriter(el, str, speed, cb) {
+      let i = 0, tag = false;
+      (function go() {
+        if (i < str.length) {
+          const c = str[i++];
+          el.innerHTML += c;
+          if (c === '<') tag = true;
+          if (c === '>') tag = false;
+          setTimeout(go, tag ? 0 : speed);
+        } else cb && cb();
+      })();
+    }
+
+    const PASSWORD = 'LAKEHOUSE';
+    const intro = ['Welcome to the "Life is what you lake of it" terminal', 'Enter your passwords to continue'];
+    const links = [
+      {label:'1) Enter Password 1', href:'https://lickwarcolin.github.io/lakehouse/CREA1E.html'},
+      {label:'2) Enter Password 2', href:'https://lickwarcolin.github.io/lakehouse/GEE2MXP.html'},
+      {label:'3) Enter Password 3', href:'https://lickwarcolin.github.io/lakehouse/RPIEWXS3.html'},
+      {label:'4) Enter Password 4', href:'https://lickwarcolin.github.io/lakehouse/4CCYHOP.html'},
+          ];
+    const speed = 50, delay = 300;
+    let bodyDiv, idx;
+
+    window.onload = () => {
+      bodyDiv = document.getElementById('terminal-body');
+      idx = 0;
+      showIntro();
+    };
+
+    function showIntro() {
+      if (idx >= intro.length) return setTimeout(promptPwd, delay);
+      const d = document.createElement('div');
+      bodyDiv.appendChild(d);
+      htmlTypewriter(d, intro[idx++], speed, () => setTimeout(showIntro, delay));
+    }
+
+    function promptPwd() {
+      bodyDiv.appendChild(document.createElement('br'));
+      const div = document.createElement('div');
+      const lbl = document.createElement('span');
+      lbl.className = 'prompt-label';
+      lbl.textContent = 'Password:';
+      div.appendChild(lbl);
+      const inp = document.createElement('input');
+      inp.type = 'password';
+      inp.className = 'password-input';
+      div.appendChild(inp);
+      bodyDiv.appendChild(div);
+      inp.focus();
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          inp.disabled = true;
+          bodyDiv.appendChild(document.createTextNode('\n\n'));
+          if (inp.value === PASSWORD) {
+            bodyDiv.appendChild(document.createTextNode('Access granted\n\n'));
+            setTimeout(showLinks, delay);
+          } else {
+            bodyDiv.appendChild(document.createTextNode('Access denied\n\n'));
+            setTimeout(promptPwd, delay);
+          }
+        }
+      });
+    }
+
+    function showLinks() {
+      bodyDiv.innerHTML = '';
+      links.forEach(item => {
+        const a = document.createElement('a');
+        a.href = item.href;
+        a.textContent = item.label;
+        a.className = 'terminal-link';
+        a.target = '_blank';
+        bodyDiv.appendChild(a);
+      });
+    }
+  </script>
+</body>
+</html>
